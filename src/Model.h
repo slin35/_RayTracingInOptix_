@@ -64,6 +64,17 @@ namespace osc {
     vec2i     resolution { -1 };
   };
   
+
+  struct PlaneData {
+      vec3f color;
+      vec3f normal;
+      float distance;
+      float fuzzy;
+      float ior;
+      bool isReflective{ false };
+      bool isRefractive{ false };
+  };
+
   struct Model {
     ~Model()
     {
@@ -73,6 +84,7 @@ namespace osc {
     
     std::vector<TriangleMesh *> meshes;
     std::vector<Texture *>      textures;
+    std::vector<PlaneData*> planes;
 
     std::vector<TriangleLight>  triangleLights;
     //! bounding box of all vertices in the model
@@ -82,5 +94,5 @@ namespace osc {
 
    void loadOBJ(const std::string& objFile, Model* model);
    void loadSpheres(std::vector<Sphere*> spheres, Model* model);
-   void loadPlanes(std::vector<Plane*> planes, Model* mode);
+   void loadPlanes(std::vector<Plane*> planes, Model* model);
 }

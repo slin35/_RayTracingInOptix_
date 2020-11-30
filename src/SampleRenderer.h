@@ -128,8 +128,11 @@ namespace osc {
     std::vector<OptixProgramGroup> missPGs;
     CUDABuffer missRecordsBuffer;
     std::vector<OptixProgramGroup> hitgroupPGs;
+    std::vector<OptixProgramGroup> hitgroupPlanes;
     CUDABuffer hitgroupRecordsBuffer;
+    CUDABuffer hitgroupRecordsBuffer2;
     OptixShaderBindingTable sbt = {};
+    OptixShaderBindingTable sbt2 = {};
 
     /*! @{ our launch parameters, on the host, and the buffer to store
         them on the device */

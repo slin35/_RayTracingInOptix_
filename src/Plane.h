@@ -12,8 +12,8 @@ class Plane : public Object {
             normal(normal), distance(distance) {}
     
 
-        vec3 getNormal() { return normal; }
-        double getDistance() { return distance; }
+        gdt::vec3f getNormal() { return gdt::vec3f((float)normal.x(), (float)normal.y(), (float)normal.z()); }
+        float getDistance() { return (float)distance; }
         Pigment getPigment() { return pigment; }
 
         void setNormal(vec3 normal) { this->normal = normal; }
@@ -28,6 +28,8 @@ class Plane : public Object {
             this->type = 3;
         }
        
+
+        gdt::vec3f getPlaneColor() { return gdt::vec3f((float)pigment.r, (float)pigment.g, (float)pigment.b); }
         virtual Pigment getColor() { return pigment; }
 
         virtual int getSurfaceType() { return type; }

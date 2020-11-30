@@ -233,7 +233,7 @@ namespace osc {
 
 #define PI 3.14159265358979323846f
   void loadSpheres(std::vector<Sphere*> spheres, Model* model) {
-      std::cout << "loading spheres " << spheres.size() << std::endl;
+      std::cout << "loading "<< spheres.size() << " spheres" << std::endl;
 
       for (auto sphere : spheres) {
           TriangleMesh* mesh = new TriangleMesh;
@@ -259,6 +259,8 @@ namespace osc {
                   vec3f normal = vec3f(cos_phi * sin_theta, -cos_theta, -sin_phi * sin_theta);
 
                   vec3f vertex = normal * sphere->getRadius() + sphere->getCenter();
+
+                  
 
                   vec2f texcord = vec2f(texu, texv);
 
@@ -299,6 +301,30 @@ namespace osc {
       }
 
   
+  }
+
+
+  void loadPlanes(std::vector<Plane*> planes, Model* model) {
+      std::cout << "loading " << planes.size() << " planes" << std::endl;
+      for (auto plane : planes) {
+          PlaneData* planeData = new PlaneData;
+
+          planeData->color = plane->getPlaneColor();
+          planeData->normal = plane->getNormal();
+          planeData->distance = plane->getDistance();
+
+          if (plane->getSurfaceType() == 1) {
+              planeData->isReflective = true;
+              planeData->fuzzy = plane->getFuzzy();
+          }
+          if (plane->getSurfaceType() == 3) {
+              planeData->isRefractive = true;
+              planeData->ior = plane->getIor();
+          }
+          
+          model->planes.push_back(planeData);
+
+      }
   }
 
 }

@@ -39,6 +39,15 @@ namespace osc {
     float ior;
   };
 
+  struct PlaneSBTData {
+      vec3f color;
+      vec3f normal;
+      float distance;
+      float fuzzy;
+      float ior;
+      bool isReflective;
+      bool isRefractive;
+  };
   
   struct LaunchParams
   {

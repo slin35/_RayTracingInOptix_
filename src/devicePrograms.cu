@@ -84,6 +84,12 @@ namespace osc {
   }
   
 
+  extern "C" __global__ void __closesthit__radiance_plane() {
+
+  }
+
+
+
   extern "C" __global__ void __closesthit__radiance()
   {
     const TriangleMeshSBTData &sbtData
@@ -257,7 +263,6 @@ namespace osc {
 
     
     // foggy
-    vec3f color = vec3f(1.0f, 1.0f, 1.0f);
 
     if (PHONG == 0) {
         if (prd.depth > MAX_DEPTH)
@@ -374,6 +379,12 @@ namespace osc {
     // we didn't hit anything, so the light is visible
     vec3f &prd = *(vec3f*)getPRD<vec3f>();
     prd = vec3f(1.0f);
+  }
+
+
+  // plane intersection
+  extern "C" __global__ void __intersection__plane() {
+
   }
 
   //------------------------------------------------------------------------------
