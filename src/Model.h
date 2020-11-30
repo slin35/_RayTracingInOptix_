@@ -18,10 +18,11 @@
 
 #include "gdt/math/AffineSpace.h"
 #include <vector>
+#include <math.h>
 
 #include "Sphere.h"
 #include "Plane.h"
-#include <math.h>
+#include "Light.h"
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
@@ -41,6 +42,7 @@ namespace osc {
 
     bool isReflective{ false };
     bool isRefractive{ false };
+    bool isEmissive{ false };
 
     float fuzzy;
     float ior;
@@ -74,6 +76,7 @@ namespace osc {
       float ior;
       bool isReflective{ false };
       bool isRefractive{ false };
+      
   };
 
   struct Model {
@@ -96,7 +99,6 @@ namespace osc {
    void loadOBJ(const std::string& objFile, Model* model);
    void loadSpheres(std::vector<Sphere*> spheres, Model* model);
    void loadPlanes(std::vector<Plane*> planes, Model* model);
-
    void loadPlanes2(std::vector<Plane*> planes, Model* model);
-
+   void loadAreaLights(std::vector<Light*> lights, Model* model);
 }

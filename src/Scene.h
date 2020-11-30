@@ -26,7 +26,8 @@ public:
     }
 
     void addLight(Light* light) {
-        lights.push_back(light);
+        if (light->isAreaLight())
+            lights.push_back(light);
         objects.push_back(light);
     }
 

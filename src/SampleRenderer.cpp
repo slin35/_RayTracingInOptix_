@@ -664,6 +664,9 @@ namespace osc {
                     rec.data.isRefractive = true;
                     rec.data.ior = mesh->ior;
                 }
+                if (mesh->isEmissive) {
+                    rec.data.isEmissive = true;
+                }
                 if (mesh->diffuseTextureID >= 0 && mesh->diffuseTextureID < textureObjects.size()) {
                     rec.data.hasTexture = true;
                     rec.data.texture = textureObjects[mesh->diffuseTextureID];

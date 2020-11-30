@@ -417,4 +417,83 @@ namespace osc {
       }
   }
 
+
+  void loadAreaLights(std::vector<Light*> lights, Model* model) {
+      std::cout << "loading " << lights.size() << " lights" << std::endl;
+      for (auto light : lights) {
+          TriangleMesh* mesh = new TriangleMesh;
+
+          vec3f normal = light->getPosition();
+          vec3f mid = light->getPosition();
+
+          vec3f v1 = light->getV1();
+          vec3f v2 = light->getV2();
+
+          vec3f uprt, uplt, btrt, btlt;
+
+          if (v1.x == 0 && v2.x == 0) {    // yz plane
+              float y0 = mid.y + v1.y * 0.5;
+              float y1 = mid.y - v1.y * 0.5;
+              float z0 = mid.z + v2.z * 0.5;
+              float z1 = mid.z - v2.z * 0.5;
+
+              uprt.x = uplt.x = btrt.x = btlt.x = mid.x;
+
+              uprt.z = uplt.z = z0;
+              btrt.z = btlt.z = z1;
+
+              uprt.y = btrt.y = y0;
+              uplt.y = btlt.y = y1;
+
+          }
+          else if (v1.y == 0 && v2.y == 0) {  // xz plane
+              float x0 = mid.x + v1.x * 0.5;
+              float x1 = mid.x - v1.x * 0.5;
+              float z0 = mid.z + v2.z * 0.5;
+              float z1 = mid.z - v2.z * 0.5;
+
+              uprt.y = uplt.y = btrt.y = btlt.y = mid.y;
+
+              uprt.x = btrt.x = x0;
+              uplt.x = btlt.x = x1;
+
+              uprt.z = uplt.z = z0;
+              btrt.z = btlt.z = z1;
+          }
+          else if (v1.z == 0 && v2.z == 0) {  // xy plane
+              float x0 = mid.x + v1.x * 0.5;
+              float x1 = mid.x - v1.x * 0.5;
+              float y0 = mid.y + v1.y * 0.5;
+              float y1 = mid.y - v1.y * 0.5;
+
+              uprt.z = uplt.z = btrt.z = btlt.z = mid.z;
+
+              uprt.y = uplt.y = y0;
+              btrt.y = btlt.y = y1;
+
+              uprt.x = btrt.x = x0;
+              uplt.x = btlt.x = x1;
+          }
+
+          mesh->vertex.push_back(uprt);
+          mesh->vertex.push_back(uplt);
+          mesh->vertex.push_back(btrt);
+          mesh->vertex.push_back(btlt);
+
+          mesh->index.push_back(vec3i(0, 1, 2));
+          mesh->index.push_back(vec3i(1, 3, 2));
+
+      /*    mesh->index.push_back(vec3i(2, 1, 0));
+          mesh->index.push_back(vec3i(2, 3, 1));*/
+
+          for (auto i = 0; i < 4; i++) {
+              mesh->normal.push_back(normal);
+          }
+
+          mesh->diffuse = light->getPigment();
+          mesh->isEmissive = true;
+          model->meshes.push_back(mesh);
+      }
+  }
+
 }

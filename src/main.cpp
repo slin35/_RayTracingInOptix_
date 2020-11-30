@@ -175,6 +175,7 @@ namespace osc {
          loadSpheres(scene.spheres, model);
     //     loadPlanes(scene.planes, model);
          loadPlanes2(scene.planes, model);
+         loadAreaLights(scene.lights, model);
          Camera camera = { scene.cameras[0]->getFrom(), scene.cameras[0]->getAt(), scene.cameras[0]->getUp() };
 
 

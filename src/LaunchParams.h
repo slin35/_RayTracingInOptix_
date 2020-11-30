@@ -35,6 +35,7 @@ namespace osc {
     cudaTextureObject_t texture;
     bool isReflective{ false };
     bool isRefractive{ false };
+    bool isEmissive{ false };
     float fuzzy;
     float ior;
   };

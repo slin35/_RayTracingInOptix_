@@ -14,10 +14,11 @@ class Light : public Object {
         Light(vec3 position, Pigment pigment) :
             position(position), pigment(pigment) {}
 
-        vec3 getPosition() { return position; }
-        Pigment getPigment() { return pigment; }
-        vec3 getV1() { return v1; }
-        vec3 getV2() { return v2; }
+        gdt::vec3f getPosition() { return gdt::vec3f((float)position.x(), (float)position.y(), (float)position.z()); }
+     //   Pigment getPigment() { return pigment; }
+        gdt::vec3f getPigment() { return gdt::vec3f((float)pigment.r, (float)pigment.g, (float)pigment.b); }
+        gdt::vec3f getV1() { return gdt::vec3f((float)v1.x(), (float)v1.y(), (float)v1.z()); }
+        gdt::vec3f getV2() { return gdt::vec3f((float)v2.x(), (float)v2.y(), (float)v2.z()); }
         bool isAreaLight() { return areaLight; }
 
         void setPosition(vec3 position) { this->position = position; }

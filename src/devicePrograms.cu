@@ -279,7 +279,7 @@ namespace osc {
             s = vec3f((prd.random() - 0.5) * 2, (prd.random() - 0.5) * 2, (prd.random() - 0.5) * 2);
         } while (length(s) > 1);
 
-        if (sbtData.isReflective == false && sbtData.isRefractive == false) {   // diffsue
+        if (sbtData.isReflective == false && sbtData.isRefractive == false && sbtData.isEmissive == false) {   // diffsue
             scatterRayDir = normal + s;
             scatterRayPos = surfPos + 1e-3f * Ng;
         }
@@ -327,6 +327,10 @@ namespace osc {
             }
 
         }
+        else if (sbtData.isEmissive) {  // area lights
+            prd.pixelColor = diffuseColor;
+            return;
+        }
 
         uint32_t u0, u1;
         PRD nprd;
@@ -348,9 +352,9 @@ namespace osc {
             RADIANCE_RAY_TYPE,            // missSBTIndex 
             u0, u1);
 
-       // prd.pixelColor = nprd.pixelColor * diffuseColor;
-        prd.pixelColor = vec3f(nprd.pixelColor.x * diffuseColor.x, nprd.pixelColor.y * diffuseColor.y, nprd.pixelColor.z * diffuseColor.z);
-      
+       prd.pixelColor = nprd.pixelColor * diffuseColor;
+     //   prd.pixelColor = vec3f(nprd.pixelColor.x * diffuseColor.x, nprd.pixelColor.y * diffuseColor.y, nprd.pixelColor.z * diffuseColor.z);
+       
     }
 
   }
