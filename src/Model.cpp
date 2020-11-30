@@ -298,6 +298,12 @@ namespace osc {
               mesh->ior = sphere->getIor();
           }
 
+          std::map<std::string, int> knownTextures;
+          mesh->diffuseTextureID = loadTexture(model,
+              knownTextures,
+              sphere->getTexturte(),
+              "../textures");
+
           model->meshes.push_back(mesh);
 
       }

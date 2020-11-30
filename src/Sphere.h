@@ -9,7 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtx/string_cast.hpp>
-
+#include <string>
 
 #include "Pigment.h"
 #include "vec3.h"
@@ -72,6 +72,12 @@ class Sphere : public Object {
             transposeCTM = glm::transpose(ctm);
         }
       
+        void setTextureImg(std::string img) {
+            this->img = img;
+        }
+
+        std::string getTexturte() { return img; }
+
         gdt::vec3f getDiffuseColor() { return gdt::vec3f((float)pigment.r, (float)pigment.g, (float)pigment.b); }
 
     //    vec3 getCenter() const { return center; }
@@ -104,6 +110,7 @@ class Sphere : public Object {
         glm::mat4 S = glm::mat4(1.0f);
         glm::mat4 R = glm::mat4(1.0f);
         glm::mat4 T = glm::mat4(1.0f);
+        std::string img;
         
 };
 

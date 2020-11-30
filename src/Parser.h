@@ -144,7 +144,7 @@ class Parser {
 
                         string img = extractImg(w);
                         img.erase(remove(img.begin(), img.end(), '\"'), img.end());
-                    //    sphere->setTextureImg(img);
+                        sphere->setTextureImg(img);
                         
                         input >> w;
                     }
