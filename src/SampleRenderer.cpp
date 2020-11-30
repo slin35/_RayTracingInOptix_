@@ -68,7 +68,7 @@ namespace osc {
         launchParams.lights.power[idx] = light.power;
         idx++;
 
-        std::cout << light.a.x << " " << light.a.y << " " << light.a.z << std::endl;
+        
     }
 
     launchParams.numLights = idx;
@@ -365,17 +365,20 @@ namespace osc {
   {
     moduleCompileOptions.maxRegisterCount  = 50;
     moduleCompileOptions.optLevel          = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
-    moduleCompileOptions.debugLevel        = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
+  //  moduleCompileOptions.debugLevel        = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
+    moduleCompileOptions.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_FULL;
 
     pipelineCompileOptions = {};
     pipelineCompileOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_GAS;
     pipelineCompileOptions.usesMotionBlur     = false;
     pipelineCompileOptions.numPayloadValues   = 2;
-    pipelineCompileOptions.numAttributeValues = 2;
+    pipelineCompileOptions.numAttributeValues = 3;
     pipelineCompileOptions.exceptionFlags     = OPTIX_EXCEPTION_FLAG_NONE;
     pipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
       
-    pipelineLinkOptions.maxTraceDepth          = 2;
+    pipelineLinkOptions.maxTraceDepth          = 10;
+
+   
       
     const std::string ptxCode = embedded_ptx_code;
       
@@ -597,6 +600,14 @@ namespace osc {
         HitgroupRecord rec;
         OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[rayID],&rec));
         rec.data.color   = mesh->diffuse;
+        if (mesh->isReflective) {
+            rec.data.isReflective = true;
+            rec.data.fuzzy = mesh->fuzzy;
+        }
+        if (mesh->isRefractive) {
+            rec.data.isRefractive = true;
+            rec.data.ior = mesh->ior;
+        }
         if (mesh->diffuseTextureID >= 0 && mesh->diffuseTextureID < textureObjects.size()) {
           rec.data.hasTexture = true;
           rec.data.texture    = textureObjects[mesh->diffuseTextureID];
@@ -607,6 +618,7 @@ namespace osc {
         rec.data.vertex   = (vec3f*)vertexBuffer[meshID].d_pointer();
         rec.data.normal   = (vec3f*)normalBuffer[meshID].d_pointer();
         rec.data.texcoord = (vec2f*)texcoordBuffer[meshID].d_pointer();
+        
         hitgroupRecords.push_back(rec);
       }
     }

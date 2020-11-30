@@ -37,6 +37,13 @@ namespace osc {
     // material data:
     vec3f              diffuse;
     int                diffuseTextureID { -1 };
+
+    bool isReflective{ false };
+    bool isRefractive{ false };
+
+    float fuzzy;
+    float ior;
+
   };
 
   struct QuadLight {

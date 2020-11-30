@@ -23,6 +23,9 @@
 using namespace osc;
 
 #define NUM_LIGHT_SAMPLES 4
+#define QUAD_LIGHT_ON 1
+#define MAX_DEPTH 15
+#define PHONG 0
 
 namespace osc {
 
@@ -38,6 +41,7 @@ namespace osc {
   struct PRD {
     Random random;
     vec3f  pixelColor;
+    int depth{ 0 };
   };
   
   static __forceinline__ __device__
@@ -79,6 +83,7 @@ namespace osc {
     /* not going to be used ... */
   }
   
+
   extern "C" __global__ void __closesthit__radiance()
   {
     const TriangleMeshSBTData &sbtData
@@ -112,190 +117,236 @@ namespace osc {
     // ------------------------------------------------------------------
     const vec3f rayDir = optixGetWorldRayDirection();
     
-    if (dot(rayDir,Ng) > 0.f) Ng = -Ng;
-    Ng = normalize(Ng);
     
-    if (dot(Ng,Ns) < 0.f)
-      Ns -= 2.f*dot(Ng,Ns)*Ng;
-    Ns = normalize(Ns);
 
     // ------------------------------------------------------------------
-    // compute diffuse material color, including diffuse texture, if
-    // available
-    // ------------------------------------------------------------------
+   
+    const vec3f surfPos
+        = (1.f - u - v) * sbtData.vertex[index.x]
+        + u * sbtData.vertex[index.y]
+        + v * sbtData.vertex[index.z];
+
     vec3f diffuseColor = sbtData.color;
+
+    // apply texture if there's any
     if (sbtData.hasTexture && sbtData.texcoord) {
-      const vec2f tc
-        = (1.f-u-v) * sbtData.texcoord[index.x]
-        +         u * sbtData.texcoord[index.y]
-        +         v * sbtData.texcoord[index.z];
-      
-      vec4f fromTexture = tex2D<float4>(sbtData.texture,tc.x,tc.y);
-      diffuseColor *= (vec3f)fromTexture;
+        const vec2f tc
+            = (1.f - u - v) * sbtData.texcoord[index.x]
+            + u * sbtData.texcoord[index.y]
+            + v * sbtData.texcoord[index.z];
+
+        vec4f fromTexture = tex2D<float4>(sbtData.texture, tc.x, tc.y);
+        diffuseColor *= (vec3f)fromTexture;
     }
 
-    // start with some ambient term
-    vec3f pixelColor = (0.1f + 0.2f*fabsf(dot(Ns,rayDir)))*diffuseColor;
-    
-    // ------------------------------------------------------------------
-    // compute shadow
-    // ------------------------------------------------------------------
-    const vec3f surfPos
-      = (1.f-u-v) * sbtData.vertex[index.x]
-      +         u * sbtData.vertex[index.y]
-      +         v * sbtData.vertex[index.z];
+    // phong
+    if (PHONG == 1) {
+        if (dot(rayDir, Ng) > 0.f) Ng = -Ng;
+        Ng = normalize(Ng);
 
-    const int numLightSamples = NUM_LIGHT_SAMPLES;
+        if (dot(Ng, Ns) < 0.f)
+            Ns -= 2.f * dot(Ng, Ns) * Ng;
+        Ns = normalize(Ns);
 
-    //for (auto light : optixLaunchParams.allLights) {
-    //    for (int lightSampleID = 0; lightSampleID < numLightSamples; lightSampleID++) {
-    //        vec3f lightPos;
-    //        float a = prd.random();
-    //        float  b = prd.random();
+        // start with some ambient term
+        vec3f pixelColor = (0.1f + 0.2f * fabsf(dot(Ns, rayDir))) * diffuseColor;
 
-    //        if (light.type == 0) {  // quad light
-    //            lightPos = light.origin + a * light.du + b * light.dv;
-    //        }
-    //        else if (light.type == 1) {  // triangle light
-    //            lightPos = (1 - sqrtf(a)) * light.a + sqrtf(a) * (1 - b) * light.b + sqrtf(a) * b * light.c;
-    //        }
+        // compute shadow
 
-    //        vec3f lightDir = lightPos - surfPos;
-    //        float lightDist = gdt::length(lightDir);
-    //        lightDir = normalize(lightDir);
 
-    //        // trace shadow ray:
-    //        const float NdotL = dot(lightDir, Ns);
-    //        if (NdotL >= 0.f) {
-    //            vec3f lightVisibility = 0.f;
-    //            // the values we store the PRD pointer in:
-    //            uint32_t u0, u1;
-    //            packPointer(&lightVisibility, u0, u1);
-    //            optixTrace(optixLaunchParams.traversable,
-    //                surfPos + 1e-3f * Ng,
-    //                lightDir,
-    //                1e-3f,      // tmin
-    //                lightDist * (1.f - 1e-3f),  // tmax
-    //                0.0f,       // rayTime
-    //                OptixVisibilityMask(255),
-    //                // For shadow rays: skip any/closest hit shaders and terminate on first
-    //                // intersection with anything. The miss shader is used to mark if the
-    //                // light was visible.
-    //                OPTIX_RAY_FLAG_DISABLE_ANYHIT
-    //                | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
-    //                | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
-    //                SHADOW_RAY_TYPE,            // SBT offset
-    //                RAY_TYPE_COUNT,               // SBT stride
-    //                SHADOW_RAY_TYPE,            // missSBTIndex 
-    //                u0, u1);
-    //            pixelColor
-    //                += lightVisibility
-    //                * optixLaunchParams.light.power
-    //                * diffuseColor
-    //                * (NdotL / (lightDist * lightDist * numLightSamples));
-    //        }
-    //
+        const int numLightSamples = NUM_LIGHT_SAMPLES;
 
-    //    }
-    //}
+        for (int idx = 0; idx < optixLaunchParams.numLights; idx++) {
+            for (int lightSampleID = 0; lightSampleID < numLightSamples; lightSampleID++) {
 
-    for (int idx = 0; idx < optixLaunchParams.numLights; idx++) {
-        for (int lightSampleID = 0; lightSampleID < numLightSamples; lightSampleID++) {
+                float a = prd.random();
+                float  b = prd.random();
 
-            float a = prd.random();
-            float  b = prd.random();
 
-            
-            const vec3f lightPos
-                = (1 - sqrtf(a)) * optixLaunchParams.lights.a[idx]
-                + sqrtf(a) * (1 - b) * optixLaunchParams.lights.b[idx] +
-                sqrtf(a) * b * optixLaunchParams.lights.c[idx];
+                const vec3f lightPos
+                    = (1 - sqrtf(a)) * optixLaunchParams.lights.a[idx]
+                    + sqrtf(a) * (1 - b) * optixLaunchParams.lights.b[idx] +
+                    sqrtf(a) * b * optixLaunchParams.lights.c[idx];
 
-            vec3f lightDir = lightPos - surfPos;
-            float lightDist = gdt::length(lightDir);
-            lightDir = normalize(lightDir);
+                vec3f lightDir = lightPos - surfPos;
+                float lightDist = gdt::length(lightDir);
+                lightDir = normalize(lightDir);
 
-       //      trace shadow ray:
-            const float NdotL = dot(lightDir, Ns);
-            if (NdotL >= 0.f) {
-                vec3f lightVisibility = 0.f;
-          //  the values we store the PRD pointer in:
-                uint32_t u0, u1;
-                packPointer(&lightVisibility, u0, u1);
-                optixTrace(optixLaunchParams.traversable,
-                    surfPos + 1e-3f * Ng,
-                    lightDir,
-                    1e-3f,      // tmin
-                    lightDist * (1.f - 1e-3f),  // tmax
-                    0.0f,       // rayTime
-                    OptixVisibilityMask(255),
-            // For shadow rays: skip any/closest hit shaders and terminate on first
-            // intersection with anything. The miss shader is used to mark if the
-            // light was visible.
-                    OPTIX_RAY_FLAG_DISABLE_ANYHIT
-                    | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
-                    | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
-                    SHADOW_RAY_TYPE,            // SBT offset
-                    RAY_TYPE_COUNT,               // SBT stride
-                    SHADOW_RAY_TYPE,            // missSBTIndex 
-                    u0, u1);
-                pixelColor
-                    += lightVisibility
-                    * optixLaunchParams.lights.power[idx]
-                    * diffuseColor
-                    * (NdotL / (lightDist * lightDist * numLightSamples));
+                //      trace shadow ray:
+                const float NdotL = dot(lightDir, Ns);
+                if (NdotL >= 0.f) {
+                    vec3f lightVisibility = 0.f;
+                    //  the values we store the PRD pointer in:
+                    uint32_t u0, u1;
+                    packPointer(&lightVisibility, u0, u1);
+                    optixTrace(optixLaunchParams.traversable,
+                        surfPos + 1e-3f * Ng,
+                        lightDir,
+                        1e-3f,      // tmin
+                        lightDist * (1.f - 1e-3f),  // tmax
+                        0.0f,       // rayTime
+                        OptixVisibilityMask(255),
+                        // For shadow rays: skip any/closest hit shaders and terminate on first
+                        // intersection with anything. The miss shader is used to mark if the
+                        // light was visible.
+                        OPTIX_RAY_FLAG_DISABLE_ANYHIT
+                        | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
+                        | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
+                        SHADOW_RAY_TYPE,            // SBT offset
+                        RAY_TYPE_COUNT,               // SBT stride
+                        SHADOW_RAY_TYPE,            // missSBTIndex 
+                        u0, u1);
+                    pixelColor
+                        += lightVisibility
+                        * optixLaunchParams.lights.power[idx]
+                        * diffuseColor
+                        * (NdotL / (lightDist * lightDist * numLightSamples));
+                }
             }
         }
-    }
 
-    // render Quadlight
-    for (int lightSampleID = 0; lightSampleID < numLightSamples; lightSampleID++) {
-        // produce random light sample
-        const vec3f lightPos
-            = optixLaunchParams.light.origin
-            + prd.random() * optixLaunchParams.light.du
-            + prd.random() * optixLaunchParams.light.dv;
-        vec3f lightDir = lightPos - surfPos;
-        float lightDist = gdt::length(lightDir);
-        lightDir = normalize(lightDir);
+        // render Quadlight
 
-        // trace shadow ray:
-        const float NdotL = dot(lightDir, Ns);
-        if (NdotL >= 0.f) {
-            vec3f lightVisibility = 0.f;
-            // the values we store the PRD pointer in:
-            uint32_t u0, u1;
-            packPointer(&lightVisibility, u0, u1);
-            optixTrace(optixLaunchParams.traversable,
-                surfPos + 1e-3f * Ng,
-                lightDir,
-                1e-3f,      // tmin
-                lightDist * (1.f - 1e-3f),  // tmax
-                0.0f,       // rayTime
-                OptixVisibilityMask(255),
-                // For shadow rays: skip any/closest hit shaders and terminate on first
-                // intersection with anything. The miss shader is used to mark if the
-                // light was visible.
-                OPTIX_RAY_FLAG_DISABLE_ANYHIT
-                | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
-                | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
-                SHADOW_RAY_TYPE,            // SBT offset
-                RAY_TYPE_COUNT,               // SBT stride
-                SHADOW_RAY_TYPE,            // missSBTIndex 
-                u0, u1);
-            pixelColor
-                += lightVisibility
-                * optixLaunchParams.light.power
-                * diffuseColor
-                * (NdotL / (lightDist * lightDist * numLightSamples));
+        if (QUAD_LIGHT_ON == 1) {
+            for (int lightSampleID = 0; lightSampleID < numLightSamples; lightSampleID++) {
+                // produce random light sample
+                const vec3f lightPos
+                    = optixLaunchParams.light.origin
+                    + prd.random() * optixLaunchParams.light.du
+                    + prd.random() * optixLaunchParams.light.dv;
+                vec3f lightDir = lightPos - surfPos;
+                float lightDist = gdt::length(lightDir);
+                lightDir = normalize(lightDir);
+
+                // trace shadow ray:
+                const float NdotL = dot(lightDir, Ns);
+                if (NdotL >= 0.f) {
+                    vec3f lightVisibility = 0.f;
+                    // the values we store the PRD pointer in:
+                    uint32_t u0, u1;
+                    packPointer(&lightVisibility, u0, u1);
+                    optixTrace(optixLaunchParams.traversable,
+                        surfPos + 1e-3f * Ng,
+                        lightDir,
+                        1e-3f,      // tmin
+                        lightDist * (1.f - 1e-3f),  // tmax
+                        0.0f,       // rayTime
+                        OptixVisibilityMask(255),
+                        // For shadow rays: skip any/closest hit shaders and terminate on first
+                        // intersection with anything. The miss shader is used to mark if the
+                        // light was visible.
+                        OPTIX_RAY_FLAG_DISABLE_ANYHIT
+                        | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
+                        | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
+                        SHADOW_RAY_TYPE,            // SBT offset
+                        RAY_TYPE_COUNT,               // SBT stride
+                        SHADOW_RAY_TYPE,            // missSBTIndex 
+                        u0, u1);
+                    pixelColor
+                        += lightVisibility
+                        * optixLaunchParams.light.power
+                        * diffuseColor
+                        * (NdotL / (lightDist * lightDist * numLightSamples));
+                }
+
+                
+            }
         }
+        prd.pixelColor = pixelColor;
     }
 
     
-    
-    prd.pixelColor = pixelColor;
+    // foggy
+    vec3f color = vec3f(1.0f, 1.0f, 1.0f);
+
+    if (PHONG == 0) {
+        if (prd.depth > MAX_DEPTH)
+            return;
+       
+        vec3f normal = normalize(Ns);
+        vec3f s;
+        vec3f scatterRayDir;
+        vec3f scatterRayPos;
+
+        do {
+            s = vec3f((prd.random() - 0.5) * 2, (prd.random() - 0.5) * 2, (prd.random() - 0.5) * 2);
+        } while (length(s) > 1);
+
+        if (sbtData.isReflective == false && sbtData.isRefractive == false) {   // diffsue
+            scatterRayDir = normal + s;
+            scatterRayPos = surfPos + 1e-3f * Ng;
+        }
+        else if (sbtData.isReflective) {    // reflection
+            vec3f direction = normalize(rayDir);
+
+            vec3f R = direction - normal * dot(direction, normal) * 2.0f;
+
+            scatterRayDir = R + s * sbtData.fuzzy;
+            scatterRayPos = surfPos + 1e-3f * Ng;
+        }
+        else if (sbtData.isRefractive) {     //refraction
+
+            vec3f direction = normalize(rayDir);
+            vec3f normal = normalize(Ng);
+            float ior = sbtData.ior;
+            float refractRatio = 1.0 / ior;
+            
+
+            if (dot(direction, normal) > 0) {
+                normal *= -1.0f;
+                refractRatio = ior;
+            }
+
+            float cos_theta = dot(-1.0f * direction, normal);
+            float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
+            float r0 = (1.0f - ior) / (1.0f + ior);
+            r0 *= r0;
+            float reflect = r0 + (1.0f - r0) * pow(1 - cos_theta, 5);   // Shlick
+
+
+            if (reflect > prd.random() || refractRatio * sin_theta > 1.0) {       // total internal reflection && Fresnel
+                vec3f R = direction - normal * dot(direction, normal) * 2.0f;
+                R = normalize(R);
+                scatterRayDir = R;
+                scatterRayPos = surfPos + R * 0.005f;
+            }
+            else {
+                vec3f r_perp = (direction + normal * cos_theta) * refractRatio;
+                vec3f r_par = normal * (-1.0f * sqrt(fabs(1.0f - pow(length(r_perp), 2))));
+                vec3f refraction = r_perp + r_par;
+                refraction = normalize(refraction);
+                scatterRayDir = refraction;
+                scatterRayPos = surfPos + refraction * 0.005f;
+            }
+
+        }
+
+        uint32_t u0, u1;
+        PRD nprd;
+        nprd.pixelColor = vec3f(0.0f);
+        nprd.depth = prd.depth + 1;
+        packPointer(&nprd, u0, u1);
+
+        optixTrace(optixLaunchParams.traversable,
+            scatterRayPos,
+            scatterRayDir,
+            0.0f,      // tmin
+            1e20f,  // tmax
+            0.0f,       // rayTime
+            OptixVisibilityMask(255),
+            OPTIX_RAY_FLAG_DISABLE_ANYHIT,
+            //   OPTIX_RAY_FLAG_NONE,
+            RADIANCE_RAY_TYPE,            // SBT offset
+            RAY_TYPE_COUNT,               // SBT stride
+            RADIANCE_RAY_TYPE,            // missSBTIndex 
+            u0, u1);
+
+        prd.pixelColor = nprd.pixelColor * diffuseColor;
+      
+    }
+
   }
-  
+
 
   extern "C" __global__ void __anyhit__radiance()
   { /*! for this simple example, this will remain empty */ }

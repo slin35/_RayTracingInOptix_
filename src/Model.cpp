@@ -284,6 +284,16 @@ namespace osc {
 
           mesh->diffuse = sphere->getDiffuseColor();
 
+          if (sphere->getSurfaceType() == 1) {
+              mesh->isReflective = true;
+              mesh->fuzzy = sphere->getFuzzy();
+
+          }
+          if (sphere->getSurfaceType() == 3) {
+              mesh->isRefractive = true;
+              mesh->ior = sphere->getIor();
+          }
+
           model->meshes.push_back(mesh);
 
       }

@@ -20,7 +20,7 @@ if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
 endif (POLICY CMP0048)
 
-project(testOptixProject)
+project(raytraceInOptix)
 
 cmake_minimum_required(VERSION 2.8)
 set (CMAKE_CXX_FLAGS "--std=c++11")
@@ -99,14 +99,14 @@ source_group("sources" FILES ${SOURCES})
 source_group("shaders" FILES ${CUDA_FILES})
 
 
-add_executable(testOptiXProject
+add_executable(raytraceInOptix
   ${embedded_ptx_code}
   ${SOURCES}
   ${HEADERS}
   ${CUDA_FILES}
   )
 
-target_link_libraries(testOptiXProject
+target_link_libraries(raytraceInOptix
   gdt
   # optix dependencies, for rendering
   ${optix_LIBRARY}

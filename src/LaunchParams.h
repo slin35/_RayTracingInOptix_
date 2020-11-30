@@ -33,16 +33,12 @@ namespace osc {
     vec3i *index;
     bool                hasTexture;
     cudaTextureObject_t texture;
+    bool isReflective{ false };
+    bool isRefractive{ false };
+    float fuzzy;
+    float ior;
   };
 
-
-  struct SphereSBTData {
-      vec3f color;
-      vec3f* vertex;
-      vec3f* normal;
-      vec3f* index;
-      vec3f* texcoord;
-  };
   
   struct LaunchParams
   {
