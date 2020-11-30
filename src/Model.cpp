@@ -234,7 +234,7 @@ namespace osc {
 #define PI 3.14159265358979323846f
   void loadSpheres(std::vector<Sphere*> spheres, Model* model) {
       std::cout << "loading "<< spheres.size() << " spheres" << std::endl;
-
+      
       for (auto sphere : spheres) {
           TriangleMesh* mesh = new TriangleMesh;
 
@@ -281,6 +281,8 @@ namespace osc {
                                       latitude * columns + longitude);
                   mesh->index.push_back(idx);
                   mesh->index.push_back(idx2);
+
+                  
               }
           }
 
@@ -324,6 +326,94 @@ namespace osc {
           
           model->planes.push_back(planeData);
 
+      }
+  }
+
+
+#define D 10000.0f
+
+  void loadPlanes2(std::vector<Plane*> planes, Model* model) {
+      std::cout << "loading " << planes.size() << " planes" << std::endl;
+      for (auto plane : planes) {
+          TriangleMesh* mesh = new TriangleMesh;
+          float distance = plane->getDistance();
+          vec3f normal = plane->getNormal();
+
+          vec3f mid = normal + gdt::normalize(normal) * distance;
+          
+
+          float x, y, z;
+          if (normal.x == 0 && normal.y == 0) {     // xy plane
+              x = rand() % 10 + 1.0f;
+              y = rand() % 10 + 1.0f;
+              z = mid.z;
+          }
+          else if (normal.x == 0 && normal.z == 0) {   // xz plane
+              x = rand() % 10 + 1.0f;
+              y = mid.y;
+              z = rand() % 10 + 1.0f;
+          }
+          else if (normal.y == 0 && normal.z == 0) {   // yz plane
+              x = mid.x;
+              y = rand() % 10 + 1.0f;
+              z = rand() % 10 + 1.0f;
+          }
+          else if (normal.x == 0) {
+              x = rand() % 10 + 1.0f;
+              y = rand() % 10 + 1.0f;
+              z = (normal.y * (y - mid.y) - normal.z * mid.z) / -normal.z;
+          }
+          else if (normal.y == 0) {
+              x = rand() % 10 + 1.0f;
+              y = rand() % 10 + 1.0f;
+              z = (normal.x * (x - mid.x) - normal.z * mid.z) / -normal.z;
+          }
+          else if (normal.z == 0) {
+              x = rand() % 10 + 1.0f;
+              y = (normal.x * (x - mid.x) - normal.y * mid.y) / -normal.y;
+              z = rand() % 10 + 1.0f;
+          }
+          else {
+              x = rand() % 10 + 1.0f;
+              y = rand() % 10 + 1.0f;
+              z = (normal.y * (y - mid.y) - normal.z * mid.z) / -normal.z;
+          }
+
+          vec3f v = gdt::normalize(vec3f(x, y, z) - mid);
+          vec3f v2 = gdt::normalize(gdt::cross(normal, v));
+         
+          vec3f d1s = mid + (v * D);
+          vec3f d1e = mid - (v * D);
+          vec3f d2s = mid + (v2 * D);
+          vec3f d2e = mid - (v2 * D);
+
+          mesh->vertex.push_back(d1s);
+          mesh->vertex.push_back(d1e);
+          mesh->vertex.push_back(d2s);
+          mesh->vertex.push_back(d2e);
+
+          mesh->index.push_back(vec3i(0, 1, 3));
+          mesh->index.push_back(vec3i(0, 2, 1));
+          
+          
+
+          for (auto i = 0; i < 4; i++) {
+              mesh->normal.push_back(normal);
+          }
+
+
+          mesh->diffuse = plane->getPlaneColor();
+
+          if (plane->getSurfaceType() == 1) {
+              mesh->isReflective = true;
+              mesh->fuzzy = plane->getFuzzy();
+          }
+          if (plane->getSurfaceType() == 3) {
+              mesh->isRefractive = true;
+              mesh->ior = plane->getIor();
+          }
+
+          model->meshes.push_back(mesh);
       }
   }
 

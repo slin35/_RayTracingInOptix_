@@ -21,6 +21,7 @@
 
 #include "Sphere.h"
 #include "Plane.h"
+#include <math.h>
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace osc {
@@ -95,4 +96,7 @@ namespace osc {
    void loadOBJ(const std::string& objFile, Model* model);
    void loadSpheres(std::vector<Sphere*> spheres, Model* model);
    void loadPlanes(std::vector<Plane*> planes, Model* model);
+
+   void loadPlanes2(std::vector<Plane*> planes, Model* model);
+
 }

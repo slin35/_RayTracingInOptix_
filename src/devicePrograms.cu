@@ -265,8 +265,10 @@ namespace osc {
     // foggy
 
     if (PHONG == 0) {
-        if (prd.depth > MAX_DEPTH)
+        if (prd.depth > MAX_DEPTH) {
+            prd.pixelColor = vec3f(0.0f);
             return;
+        }
        
         vec3f normal = normalize(Ns);
         vec3f s;
@@ -292,7 +294,7 @@ namespace osc {
         else if (sbtData.isRefractive) {     //refraction
 
             vec3f direction = normalize(rayDir);
-            vec3f normal = normalize(Ng);
+            vec3f normal = normalize(Ns);
             float ior = sbtData.ior;
             float refractRatio = 1.0 / ior;
             
@@ -346,7 +348,8 @@ namespace osc {
             RADIANCE_RAY_TYPE,            // missSBTIndex 
             u0, u1);
 
-        prd.pixelColor = nprd.pixelColor * diffuseColor;
+       // prd.pixelColor = nprd.pixelColor * diffuseColor;
+        prd.pixelColor = vec3f(nprd.pixelColor.x * diffuseColor.x, nprd.pixelColor.y * diffuseColor.y, nprd.pixelColor.z * diffuseColor.z);
       
     }
 
@@ -370,8 +373,13 @@ namespace osc {
   extern "C" __global__ void __miss__radiance()
   {
     PRD &prd = *getPRD<PRD>();
-    // set to constant white as background color
-    prd.pixelColor = vec3f(1.0f);
+  
+   // vec3f color = vec3f(0.88f, 0.88f, 0.88f); grey
+    vec3f color = vec3f(0.827f, 0.867f, 0.922f);
+    const float iy = optixGetWorldRayDirection().y;
+    const float t = 2.5 * (iy + 1.0);
+    prd.pixelColor = vec3f((float)1, (float)1, (float)1) * ((float)(1.0f - t)) + color * t;
+
   }
 
   extern "C" __global__ void __miss__shadow()

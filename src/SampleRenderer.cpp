@@ -371,7 +371,8 @@ namespace osc {
     void SampleRenderer::createModule()
     {
         moduleCompileOptions.maxRegisterCount = 50;
-        moduleCompileOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
+      //  moduleCompileOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
+        moduleCompileOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_LEVEL_0;
         //  moduleCompileOptions.debugLevel        = OPTIX_COMPILE_DEBUG_LEVEL_NONE;
         moduleCompileOptions.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_FULL;
 
@@ -571,8 +572,8 @@ namespace osc {
         for (auto pg : missPGs)
             programGroups.push_back(pg);
 
-    /*    for (auto pg : hitgroupPlanes)
-            programGroups.push_back(pg);*/
+        //for (auto pg : hitgroupPlanes)
+        //    programGroups.push_back(pg);
 
         char log[2048];
         size_t sizeof_log = sizeof(log);
@@ -622,7 +623,7 @@ namespace osc {
         raygenRecordsBuffer.alloc_and_upload(raygenRecords);
         sbt.raygenRecord = raygenRecordsBuffer.d_pointer();
 
-        sbt2.raygenRecord = raygenRecordsBuffer.d_pointer();
+     //   sbt2.raygenRecord = raygenRecordsBuffer.d_pointer();
 
         // ------------------------------------------------------------------
         // build miss records
@@ -639,9 +640,9 @@ namespace osc {
         sbt.missRecordStrideInBytes = sizeof(MissRecord);
         sbt.missRecordCount = (int)missRecords.size();
 
-        sbt2.missRecordBase = missRecordsBuffer.d_pointer();
+    /*    sbt2.missRecordBase = missRecordsBuffer.d_pointer();
         sbt2.missRecordStrideInBytes = sizeof(MissRecord);
-        sbt2.missRecordCount = (int)missRecords.size();
+        sbt2.missRecordCount = (int)missRecords.size();*/
 
         // ------------------------------------------------------------------
         // build hitgroup records
@@ -686,7 +687,7 @@ namespace osc {
 
         // ------------------------------------------------------------------
         // plane hitgroup records
-        int numPlanes = (int)model->planes.size();
+       /* int numPlanes = (int)model->planes.size();
         std::vector<HitgroupRecord2> hitgroupPlaneRecords;
         for (int i = 0; i < numPlanes; i++) {
             for (int rayID = 0; rayID < RAY_TYPE_COUNT; rayID++) {
@@ -715,7 +716,7 @@ namespace osc {
             sbt2.hitgroupRecordCount = (int)hitgroupPlaneRecords.size();
         }
         
-    
+    */
 
 
     }

@@ -15,7 +15,6 @@
 #include "Light.h"
 #include "Object.h"
 #include "Sphere.h"
-#include "Util.h"
 #include "Plane.h"
 
 
