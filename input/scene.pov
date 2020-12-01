@@ -16,6 +16,10 @@ light_source {
   }
 
 
+sphere { <-2.5, -2, 3>, 1
+   pigment { image_map {png "me.png"} }
+}
+
 plane {<0, 1, 0>, -4
       pigment {color rgb <1.0, 1.0, 1.0>}
 }

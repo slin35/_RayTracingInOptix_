@@ -279,7 +279,9 @@ namespace osc {
             s = vec3f((prd.random() - 0.5) * 2, (prd.random() - 0.5) * 2, (prd.random() - 0.5) * 2);
         } while (length(s) > 1);
 
-        if (sbtData.isReflective == false && sbtData.isRefractive == false && sbtData.isEmissive == false) {   // diffsue
+        if (sbtData.isReflective == false && 
+            sbtData.isRefractive == false && 
+            sbtData.isEmissive == false) {   // diffsue
             scatterRayDir = normal + s;
             scatterRayPos = surfPos + 1e-3f * Ng;
         }

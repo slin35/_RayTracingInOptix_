@@ -19,12 +19,12 @@ light_source {
 }
 
 sphere { <0, 0, -1>, 2.5
-  pigment { image_map {bmp "brick.bmp"} }
+  pigment { image_map {bmp "kero1.jpg"} }
 }
 
 
 plane {<0, 1, 0>, -2.5
-      pigment { image_map {bmp "brick.bmp"} }
+      pigment {color rgb <1.0, 1.-0, 1.0>}
 }
 
 plane {<1, 1, 0>, -5

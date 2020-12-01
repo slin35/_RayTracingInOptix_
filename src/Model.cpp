@@ -289,11 +289,7 @@ namespace osc {
                   float texu = (float)longitude / (float)U;
 
                   vec3f normal = vec3f(cos_phi * sin_theta, -cos_theta, -sin_phi * sin_theta);
-
                   vec3f vertex = normal * sphere->getRadius() + sphere->getCenter();
-
-                  
-
                   vec2f texcord = vec2f(texu, texv);
 
                   mesh->normal.push_back(normal);
@@ -313,8 +309,6 @@ namespace osc {
                                       latitude * columns + longitude);
                   mesh->index.push_back(idx);
                   mesh->index.push_back(idx2);
-
-                  
               }
           }
 
