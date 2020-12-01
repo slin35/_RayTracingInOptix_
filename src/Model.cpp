@@ -164,62 +164,94 @@ namespace osc {
       throw std::runtime_error("Could not read OBJ model from "+objFile+" : "+err);
     }
 
-    if (materials.empty())
-      throw std::runtime_error("could not parse materials ...");
+  //  if (materials.empty())
+  //    throw std::runtime_error("could not parse materials ...");
 
     std::cout << "Done loading obj file - found " << shapes.size() << " shapes with " << materials.size() << " materials" << std::endl;
-    for (int shapeID=0;shapeID<(int)shapes.size();shapeID++) {
-      tinyobj::shape_t &shape = shapes[shapeID];
 
-      std::set<int> materialIDs;
-      for (auto faceMatID : shape.mesh.material_ids)
-        materialIDs.insert(faceMatID);
-      
-      std::map<tinyobj::index_t,int> knownVertices;
-      std::map<std::string,int>      knownTextures;
-      
-      for (int materialID : materialIDs) {
-        TriangleMesh *mesh = new TriangleMesh;
-        
-        for (int faceID=0;faceID<shape.mesh.material_ids.size();faceID++) {
-          if (shape.mesh.material_ids[faceID] != materialID) continue;
-          tinyobj::index_t idx0 = shape.mesh.indices[3*faceID+0];
-          tinyobj::index_t idx1 = shape.mesh.indices[3*faceID+1];
-          tinyobj::index_t idx2 = shape.mesh.indices[3*faceID+2];
-          
-          vec3i idx(addVertex(mesh, attributes, idx0, knownVertices),
+    if (materials.empty()) {
+        for (int s = 0; s < (int)shapes.size(); s++) {
+            TriangleMesh* mesh = new TriangleMesh;
+            tinyobj::shape_t& shape = shapes[s];
+
+            std::map<tinyobj::index_t, int> knownVertices;
+            std::map<std::string, int>      knownTextures;
+
+            size_t index_offset = 0;
+
+            for (int f = 0; f < (int)shape.mesh.num_face_vertices.size(); f++) {
+                tinyobj::index_t idx0 = shape.mesh.indices[3 * f + 0];
+                tinyobj::index_t idx1 = shape.mesh.indices[3 * f + 1];
+                tinyobj::index_t idx2 = shape.mesh.indices[3 * f + 2];
+
+                vec3i idx(addVertex(mesh, attributes, idx0, knownVertices),
                     addVertex(mesh, attributes, idx1, knownVertices),
                     addVertex(mesh, attributes, idx2, knownVertices));
-          mesh->index.push_back(idx);
-          mesh->diffuse = (const vec3f&)materials[materialID].diffuse;
-          mesh->diffuseTextureID = loadTexture(model,
-                                               knownTextures,
-                                               materials[materialID].diffuse_texname,
-                                               modelDir);
+                mesh->index.push_back(idx);
+                mesh->diffuse = vec3f(0.6f, 0.6f, 0.8f);
 
+            }
 
-          if (materials[materialID].emission[0] + materials[materialID].emission[1] + materials[materialID].emission[2] > 0) {
-              vec3f a = vec3f(attributes.vertices[3 * idx0.vertex_index + 0],
-                  attributes.vertices[3 * idx0.vertex_index + 1],
-                  attributes.vertices[3 * idx0.vertex_index + 2]);
-              vec3f b = vec3f(attributes.vertices[3 * idx1.vertex_index + 0],
-                  attributes.vertices[3 * idx1.vertex_index + 1],
-                  attributes.vertices[3 * idx1.vertex_index + 2]);
-              vec3f c = vec3f(attributes.vertices[3 * idx2.vertex_index + 0],
-                  attributes.vertices[3 * idx2.vertex_index + 1],
-                  attributes.vertices[3 * idx2.vertex_index + 2]);
-              vec3f power = vec3f(materials[materialID].emission[0], materials[materialID].emission[1], materials[materialID].emission[2]);
-          
-              model->triangleLights.push_back(TriangleLight{ a, b, c, power });
-
-          }
+            if (mesh->vertex.empty())
+                delete mesh;
+            else
+                model->meshes.push_back(mesh);
         }
+    }
+    else {
+        for (int shapeID = 0; shapeID < (int)shapes.size(); shapeID++) {
+            tinyobj::shape_t& shape = shapes[shapeID];
 
-        if (mesh->vertex.empty())
-          delete mesh;
-        else
-          model->meshes.push_back(mesh);
-      }
+            std::set<int> materialIDs;
+            for (auto faceMatID : shape.mesh.material_ids)
+                materialIDs.insert(faceMatID);
+
+            std::map<tinyobj::index_t, int> knownVertices;
+            std::map<std::string, int>      knownTextures;
+
+            for (int materialID : materialIDs) {
+                TriangleMesh* mesh = new TriangleMesh;
+
+                for (int faceID = 0; faceID < shape.mesh.material_ids.size(); faceID++) {
+                    if (shape.mesh.material_ids[faceID] != materialID) continue;
+                    tinyobj::index_t idx0 = shape.mesh.indices[3 * faceID + 0];
+                    tinyobj::index_t idx1 = shape.mesh.indices[3 * faceID + 1];
+                    tinyobj::index_t idx2 = shape.mesh.indices[3 * faceID + 2];
+
+                    vec3i idx(addVertex(mesh, attributes, idx0, knownVertices),
+                        addVertex(mesh, attributes, idx1, knownVertices),
+                        addVertex(mesh, attributes, idx2, knownVertices));
+                    mesh->index.push_back(idx);
+                    mesh->diffuse = (const vec3f&)materials[materialID].diffuse;
+                    mesh->diffuseTextureID = loadTexture(model,
+                        knownTextures,
+                        materials[materialID].diffuse_texname,
+                        modelDir);
+
+
+                    if (materials[materialID].emission[0] + materials[materialID].emission[1] + materials[materialID].emission[2] > 0) {
+                        vec3f a = vec3f(attributes.vertices[3 * idx0.vertex_index + 0],
+                            attributes.vertices[3 * idx0.vertex_index + 1],
+                            attributes.vertices[3 * idx0.vertex_index + 2]);
+                        vec3f b = vec3f(attributes.vertices[3 * idx1.vertex_index + 0],
+                            attributes.vertices[3 * idx1.vertex_index + 1],
+                            attributes.vertices[3 * idx1.vertex_index + 2]);
+                        vec3f c = vec3f(attributes.vertices[3 * idx2.vertex_index + 0],
+                            attributes.vertices[3 * idx2.vertex_index + 1],
+                            attributes.vertices[3 * idx2.vertex_index + 2]);
+                        vec3f power = vec3f(materials[materialID].emission[0], materials[materialID].emission[1], materials[materialID].emission[2]);
+
+                        model->triangleLights.push_back(TriangleLight{ a, b, c, power });
+
+                    }
+                }
+
+                if (mesh->vertex.empty())
+                    delete mesh;
+                else
+                    model->meshes.push_back(mesh);
+            }
+        }
     }
 
     // of course, you should be using tbb::parallel_for for stuff

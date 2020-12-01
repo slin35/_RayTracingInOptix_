@@ -17,7 +17,7 @@ light_source {
     area_light <0, 2, 0>, <0, 0, 4>
 }
 
-sphere { <35, 0, 0>, 33
+sphere { <35, 0, 0>, 3.5
   pigment { color rgb <0.8, 0.8, 0.1>}
 }
 

@@ -5,25 +5,19 @@ camera {
   look_at   <0, 0, 0>
 }
 
-
 light_source {
     <0, 6, 0>
     color rgb <1.5, 1.5, 1.5>
     area_light <8, 0, 0>, <0, 0, 8>
   }
-  
-
-sphere { <0, 0, 0>, 3
-  finish {ior 1.5}
-}
 
 light_source {
-    <-6, 0, 0>
+    <-6, 4, -4>
     color rgb <2.0, 2.0, 4.0>
     area_light <0, 4, 0>, <0, 0, 4>
 }
 
-sphere { <2.95, 0.35, 2>, 2
+sphere { <2.5, 0.35, 2>, 1.5
   finish {ior 1.5}
 }
 
@@ -32,9 +26,12 @@ sphere { <-2, 1, -1>, 0.5
   finish {reflection 0.0}
 }
 
-
 plane {<0, 1, 0>, -2.5
       pigment {color rgb <0.6, 0.1, 0.6>}
+}
+
+plane {<0, 0, 1>, -6 
+      pigment {color rgb <0.1, 0.1, 0.6>}
 }
 
 plane {<1, 1, 0>, -5
@@ -42,9 +39,5 @@ plane {<1, 1, 0>, -5
 }
 
 plane {<-1, 0, 0>, -5
-  pigment {color rgb <1.0, 0.9, 0>}
-}
-
-plane {<0, 0, 1>, -6 
-      pigment {color rgb <0.1, 0.1, 0.8>}
+      pigment {color rgb <0.8, 0.8, 0.1>}
 }

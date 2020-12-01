@@ -382,7 +382,6 @@ namespace osc {
     const float iy = optixGetWorldRayDirection().y;
     const float t = 2.5 * (iy + 1.0);
     prd.pixelColor = vec3f((float)1, (float)1, (float)1) * ((float)(1.0f - t)) + color * t;
-
   }
 
   extern "C" __global__ void __miss__shadow()

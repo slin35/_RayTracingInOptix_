@@ -26,14 +26,14 @@ sphere {
 sphere { 
   <4.2, 2.35, 2>, 0.8
   pigment {
-    image_map {jpg "../imgs/world.jpg"}
+    image_map {jpg "world.jpg"}
   }
 }
 
 sphere { 
    <-5.9, -0.5, 0>, 3.1
   pigment {
-    image_map {jpg "../imgs/mosaic.jpg"}
+    image_map {jpg "mosaic.jpg"}
   }
 
 }
@@ -41,7 +41,7 @@ sphere {
 sphere { 
    <0, -35, 0>, 30
   pigment {
-    image_map {bmp "../imgs/brick.bmp"}
+    image_map {bmp "brick.bmp"}
   }
 }
 

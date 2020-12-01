@@ -169,7 +169,8 @@ namespace osc {
 
     try {
         loadOBJ("../models/vokselia_spawn/vokselia_spawn.obj", model);
-   //     Camera camera = {vec3f(0.0f, 0.0f, 5.0f), model->bounds.center()-vec3f(0,0,0), vec3f(0.f,1.f,0.f) };
+     //   loadOBJ("../models/icoNoNormals.obj", model);
+      //  Camera camera = {vec3f(0.0f, 0.0f, 5.0f), model->bounds.center()-vec3f(0,0,0), vec3f(0.f,1.f,0.f) };
 
 
          loadSpheres(scene.spheres, model);

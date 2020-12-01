@@ -7,6 +7,6 @@ camera {
 
 light_source {<2, 8, 7> color rgb <1.0, 1.0, 1.0>}
 
-plane {<0, 1, 0>, -4
+plane {<0, 1, 0>, -1.5
      pigment {color rgb <0.3, 0.0, 0.5>}
 }
