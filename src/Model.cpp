@@ -336,7 +336,8 @@ namespace osc {
   }
 
 
-#define D 10000.0f
+//#define D 10000.0f
+#define D 20.0f
 
   void loadPlanes2(std::vector<Plane*> planes, Model* model) {
       std::cout << "loading " << planes.size() << " planes" << std::endl;
@@ -401,7 +402,18 @@ namespace osc {
           mesh->index.push_back(vec3i(0, 1, 3));
           mesh->index.push_back(vec3i(0, 2, 1));
           
+     //     mesh->texcoord.push_back(vec2f(0.0f, 0.0f));
+       //   mesh->texcoord.push_back(vec2f(1.0f, 1.0f));
           
+       //   mesh->texcoord.push_back(vec2f(0.0f, 1.0f));
+       //   mesh->texcoord.push_back(vec2f(1.0f, 0.0f));
+
+          mesh->texcoord.push_back(vec2f(1.0f, 0.0f));
+          
+          mesh->texcoord.push_back(vec2f(0.0f, 0.0f));
+          mesh->texcoord.push_back(vec2f(1.0f, 1.0f));
+
+          mesh->texcoord.push_back(vec2f(0.0f, 1.0f));
 
           for (auto i = 0; i < 4; i++) {
               mesh->normal.push_back(normal);
@@ -418,6 +430,12 @@ namespace osc {
               mesh->isRefractive = true;
               mesh->ior = plane->getIor();
           }
+
+          std::map<std::string, int> knownTextures;
+          mesh->diffuseTextureID = loadTexture(model,
+              knownTextures,
+              plane->getTexturte(),
+              "../textures");
 
           model->meshes.push_back(mesh);
       }
@@ -498,6 +516,97 @@ namespace osc {
 
           mesh->diffuse = light->getPigment();
           mesh->isEmissive = true;
+          model->meshes.push_back(mesh);
+      }
+  }
+
+
+  void loadPlanes3(std::vector<Plane*> planes, Model* model) {
+      std::cout << "loading " << planes.size() << " planes" << std::endl;
+
+      int U = 1, V = 1;
+      float uTile = 2.0f / U;
+      float vTile = 2.0f / V;
+      vec3f corner;
+      int tessV = 1;
+      int tessU = 1;
+
+      for (auto plane : planes) {
+          TriangleMesh* mesh = new TriangleMesh;
+          float distance = plane->getDistance();
+          vec3f normal = plane->getNormal();
+
+          vec3f mid = normal + gdt::normalize(normal) * distance;
+
+
+          if (normal.x == 0 && normal.y == 0) {     // xy plane
+              corner = vec3f(-1.0f, -1.0f, 0.0f);
+
+              for (int j = 0; j <= V; j++) {
+                  float v = float(j) * vTile;
+                  for (int i = 0; i <= U; i++) {
+                      float u = float(i) * uTile;
+                      mesh->vertex.push_back(corner + vec3f(u, v, 0.0f));
+                      mesh->texcoord.push_back(vec2f(u * 0.5f, v * 0.5f));
+                      mesh->normal.push_back(normal);
+                  }
+              }
+          }
+          else if (normal.x == 0 && normal.z == 0) {   // xz plane
+              corner = vec3f(-1.0f, 0.0f, 1.0f);
+
+              std::cout << "rendering plane " << std::endl;
+
+              for (int j = 0; j <= V; j++) {
+                  float v = float(j) * vTile;
+                  for (int i = 0; i <= U; i++) {
+                      float u = float(i) * uTile;
+                      mesh->vertex.push_back(corner + vec3f(u, 0.0f, -v));
+                      mesh->texcoord.push_back(vec2f(u * 0.5f, v * 0.5f));
+                      mesh->normal.push_back(normal);
+                  }
+              }
+          }
+          else if (normal.y == 0 && normal.z == 0) {   // yz plane
+              corner = vec3f(0.0f, -1.0f, 1.0f);
+              for (int j = 0; j <= V; j++) {
+                  float v = (float)j * vTile;
+                  for (int i = 0; i <= U; i++) {
+                      float u = float(i) * uTile;
+                      mesh->vertex.push_back(corner + vec3f(0.0f, v, -u));
+                      mesh->texcoord.push_back(vec2f(u * 0.5f, v * 0.5f));
+                      mesh->normal.push_back(normal);
+                  }
+              }
+          }
+
+          int stride = U + 1;
+          for (int j = 0; j < V; j++) {
+              for (int i = 0; i < U; i++) {
+                  mesh->index.push_back(vec3i(j * stride + i, j * stride + i + 1, (j + 1) * stride + i + 1));
+                  mesh->index.push_back(vec3i((j + 1) * stride + i + 1, (j + 1) * stride + i, j * stride + i));
+              }
+          }
+
+          mesh->diffuse = plane->getPlaneColor();
+
+          if (plane->getSurfaceType() == 1) {
+              mesh->isReflective = true;
+              mesh->fuzzy = plane->getFuzzy();
+          }
+          if (plane->getSurfaceType() == 3) {
+              mesh->isRefractive = true;
+              mesh->ior = plane->getIor();
+          }
+
+          std::map<std::string, int> knownTextures;
+          mesh->diffuseTextureID = loadTexture(model,
+              knownTextures,
+              plane->getTexturte(),
+              "../textures");
+
+          std::cout << mesh->diffuseTextureID << std::endl;
+
           model->meshes.push_back(mesh);
       }
   }

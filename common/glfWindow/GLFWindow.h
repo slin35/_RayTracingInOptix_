@@ -299,7 +299,7 @@ namespace osc {
     // virtual void resize(const vec2i &newSize)
     // { /* empty - to be subclassed by user */ }
 
-    float speed = 0.05;
+    float speed = 0.01;
 
     virtual void key(int key, int mods) override
     {

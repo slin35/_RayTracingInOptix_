@@ -28,6 +28,11 @@ class Plane : public Object {
             this->type = 3;
         }
        
+        void setTextureImg(std::string img) {
+            this->img = img;
+        }
+
+        std::string getTexturte() { return img; }
 
         gdt::vec3f getPlaneColor() { return gdt::vec3f((float)pigment.r, (float)pigment.g, (float)pigment.b); }
         virtual Pigment getColor() { return pigment; }
@@ -44,4 +49,5 @@ class Plane : public Object {
         double fuzzy = 0;
         int type = 0;
         double ior = 0;
+        std::string img;
 };

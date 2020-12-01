@@ -353,7 +353,6 @@ namespace osc {
             u0, u1);
 
        prd.pixelColor = nprd.pixelColor * diffuseColor;
-     //   prd.pixelColor = vec3f(nprd.pixelColor.x * diffuseColor.x, nprd.pixelColor.y * diffuseColor.y, nprd.pixelColor.z * diffuseColor.z);
        
     }
 

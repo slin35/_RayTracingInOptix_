@@ -276,7 +276,7 @@ class Parser {
 
                         string img = extractImg(w);
                         img.erase(remove(img.begin(), img.end(), '\"'), img.end());
-                    //    plane->setTextureImg(img);
+                        plane->setTextureImg(img);
 
                         input >> w;
                     }

@@ -13,6 +13,10 @@ light_source {
   }
   
 
+sphere { <0, 0, 0>, 3
+  finish {ior 1.5}
+}
+
 light_source {
     <-6, 0, 0>
     color rgb <2.0, 2.0, 4.0>

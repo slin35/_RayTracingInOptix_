@@ -100,5 +100,6 @@ namespace osc {
    void loadSpheres(std::vector<Sphere*> spheres, Model* model);
    void loadPlanes(std::vector<Plane*> planes, Model* model);
    void loadPlanes2(std::vector<Plane*> planes, Model* model);
+   void loadPlanes3(std::vector<Plane*> planes, Model* model);
    void loadAreaLights(std::vector<Light*> lights, Model* model);
 }

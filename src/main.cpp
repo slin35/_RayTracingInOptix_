@@ -109,29 +109,29 @@ namespace osc {
       pixels.resize(newSize.x*newSize.y);
     }
 
-   /* virtual void key(int key, int mods)
-    {
-      if (key == 'D' || key == ' ' || key == 'd') {
-        sample.denoiserOn = !sample.denoiserOn;
-        std::cout << "denoising now " << (sample.denoiserOn?"ON":"OFF") << std::endl;
-      }
-      if (key == 'A' || key == 'a') {
-        sample.accumulate = !sample.accumulate;
-        std::cout << "accumulation/progressive refinement now " << (sample.accumulate?"ON":"OFF") << std::endl;
-      }
-      if (key == ',') {
-        sample.launchParams.numPixelSamples
-          = std::max(1,sample.launchParams.numPixelSamples-1);
-        std::cout << "num samples/pixel now "
-                  << sample.launchParams.numPixelSamples << std::endl;
-      }
-      if (key == '.') {
-        sample.launchParams.numPixelSamples
-          = std::max(1,sample.launchParams.numPixelSamples+1);
-        std::cout << "num samples/pixel now "
-                  << sample.launchParams.numPixelSamples << std::endl;
-      }
-    }*/
+    //virtual void key(int key, int mods)
+    //{
+    //  if (key == 'D' || key == ' ' || key == 'd') {
+    //    sample.denoiserOn = !sample.denoiserOn;
+    //    std::cout << "denoising now " << (sample.denoiserOn?"ON":"OFF") << std::endl;
+    //  }
+    //  if (key == 'A' || key == 'a') {
+    //    sample.accumulate = !sample.accumulate;
+    //    std::cout << "accumulation/progressive refinement now " << (sample.accumulate?"ON":"OFF") << std::endl;
+    //  }
+    //  if (key == ',') {
+    //    sample.launchParams.numPixelSamples
+    //      = std::max(1,sample.launchParams.numPixelSamples-1);
+    //    std::cout << "num samples/pixel now "
+    //              << sample.launchParams.numPixelSamples << std::endl;
+    //  }
+    //  if (key == '.') {
+    //    sample.launchParams.numPixelSamples
+    //      = std::max(1,sample.launchParams.numPixelSamples+1);
+    //    std::cout << "num samples/pixel now "
+    //              << sample.launchParams.numPixelSamples << std::endl;
+    //  }
+    //}
     
 
     vec2i                 fbSize;
@@ -168,13 +168,14 @@ namespace osc {
 
 
     try {
-      //  loadOBJ("../models/vokselia_spawn/vokselia_spawn.obj", model);
-     //   Camera camera = {vec3f(0.0f, 0.0f, 5.0f), model->bounds.center()-vec3f(0,0,0), vec3f(0.f,1.f,0.f) };
+        loadOBJ("../models/vokselia_spawn/vokselia_spawn.obj", model);
+   //     Camera camera = {vec3f(0.0f, 0.0f, 5.0f), model->bounds.center()-vec3f(0,0,0), vec3f(0.f,1.f,0.f) };
 
 
          loadSpheres(scene.spheres, model);
     //     loadPlanes(scene.planes, model);
          loadPlanes2(scene.planes, model);
+      //   loadPlanes3(scene.planes, model);
          loadAreaLights(scene.lights, model);
          Camera camera = { scene.cameras[0]->getFrom(), scene.cameras[0]->getAt(), scene.cameras[0]->getUp() };
 
