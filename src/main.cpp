@@ -148,9 +148,9 @@ namespace osc {
 
       // parsing povray file
       std::ifstream inFile;
-      Scene scene(stoi(av[2]));
+      Scene scene;
 
-      if (ac > 2) {
+      if (ac > 1) {
           inFile.open(av[1]);
 
           if (inFile.is_open()) {
@@ -168,7 +168,7 @@ namespace osc {
 
 
     try {
-        loadOBJ("../models/vokselia_spawn/vokselia_spawn.obj", model);
+        loadOBJ(av[2], model);
      //   loadOBJ("../models/icoNoNormals.obj", model);
       //  Camera camera = {vec3f(0.0f, 0.0f, 5.0f), model->bounds.center()-vec3f(0,0,0), vec3f(0.f,1.f,0.f) };
 
